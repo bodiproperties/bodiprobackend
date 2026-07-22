@@ -12,7 +12,6 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/projects.routes.js";
 import newsRoutes from "./routes/news.routes.js";
-import aiRoutes from "./routes/ai.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
 
 // Алдаа боловсруулах middleware
@@ -58,7 +57,6 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/news", newsRoutes);
-app.use("/api/admin", aiRoutes);
 app.use("/api/upload", uploadRoutes);
 
 // Алдааны зохицуулалт (Эдгээр нь хамгийн доор байх ёстой)

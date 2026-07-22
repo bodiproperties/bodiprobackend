@@ -12,7 +12,6 @@
     "seed": "node src/seed.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.110.0",
     "@azure/storage-blob": "^12.33.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
