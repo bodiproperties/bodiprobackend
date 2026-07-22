@@ -1,10 +1,4 @@
 import "dotenv/config";
-
-console.log("=== DEBUG ===");
-console.log("CWD:", process.cwd());
-console.log("API KEY exists:", !!process.env.ANTHROPIC_API_KEY);
-console.log("API KEY prefix:", process.env.ANTHROPIC_API_KEY?.slice(0, 15));
-console.log("=============");
 import express from "express";
 import cors from "cors";
 
@@ -28,15 +22,12 @@ const allowedOrigins = rawOrigins
 app.use(
   cors({
     origin(origin, callback) {
-      // 1. Localhost дээр хөгжүүлэлт хийж байгаа эсвэл curl/Postman зэргээр хандаж байвал (origin нь undefined байна)
-      // 2. Эсвэл CORS_ORIGIN-д заасан зөвшөөрөгдсөн хаяг мөн бол
-      // 3. Эсвэл CORS_ORIGIN ерөөсөө тохируулагдаагүй бол (хөгжүүлэлтийн горимд бүгдийг зөвшөөрөх)
       if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
       return callback(new Error(`Origin ${origin} check failed by CORS policy`));
     },
-    credentials: true, // Хэрэв cookies, session ашиглах бол шаардлагатай
+    credentials: true,
   })
 );
 
