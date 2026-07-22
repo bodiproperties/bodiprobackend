@@ -7,7 +7,7 @@ export function login(req, res) {
   const okPass = password === process.env.ADMIN_PASSWORD;
 
   if (!okEmail || !okPass) {
-    return res.status(401).json({ error: "Invalid credentials" });
+    return res.status(401).json({ error: "Нууц үг эсвэл майл буруу байна" });
   }
 
   const token = jwt.sign(
