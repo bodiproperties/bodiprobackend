@@ -10,7 +10,7 @@ const slugify = (s) =>
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-") 
+    .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 
 // Public list. Admin token байвал бүх төлөв (draft/hidden) ч ирнэ.
@@ -57,7 +57,15 @@ export const getNewsBySlug = asyncHandler(async (req, res) => {
 });
 
 export const createNews = asyncHandler(async (req, res) => {
-  const { titleEn, titleMn, descEn = "", descMn = "", youtubeUrl = "", status = "draft", publishedAt = null } = req.body || {};
+  const {
+    titleEn,
+    titleMn,
+    descEn = "",
+    descMn = "",
+    youtubeUrl = "",
+    status = "draft",
+    publishedAt = null,
+  } = req.body || {};
 
   if (!titleEn?.trim() && !titleMn?.trim()) {
     return res
@@ -66,8 +74,11 @@ export const createNews = asyncHandler(async (req, res) => {
   }
 
   const finalStatus = normStatus(status);
-  const finalSlug =
-    slugify(titleEn || titleMn || "") || `news-${Date.now()}`;
+
+  // Slug vргэлж давхцахгvй байхын тулд timestamp нэмнэ
+  const baseSlug = slugify(titleEn || titleMn || "") || "news";
+  const finalSlug = `${baseSlug}-${Date.now()}`;
+
   // published_at: гараар өгсөн бол түүнийг, эс бол published үед now(), бусад үед null
   const pubAt = publishedAt
     ? new Date(publishedAt)
