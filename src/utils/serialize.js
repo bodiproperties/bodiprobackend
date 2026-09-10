@@ -1,7 +1,6 @@
 // Map DB rows -> clean API shapes (camelCase, matches the Next.js frontend types)
 
 export function serializeProject(row) {
-  if (!row) return null;
   return {
     id: row.id,
     title: row.title,
@@ -9,11 +8,11 @@ export function serializeProject(row) {
     location: row.location,
     year: row.year,
     image: row.image,
-    gallery: row.gallery ?? [],
-    description: row.description ?? "",
-    longDescription: row.long_description ?? "",
-    detail: row.detail ?? {},
-    sortOrder: row.sort_order ?? 0,
+    description: { en: row.description_en || "", mn: row.description_mn || "" },
+    detail: row.detail || {},
+    sortOrder: row.sort_order,
+    status: row.status,              // ← энэ мөр байх ёстой
+    publishedAt: row.published_at,   // ← энэ мөр байх ёстой
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
