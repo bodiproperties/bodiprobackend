@@ -9,9 +9,10 @@ const slugify = (s) =>
   String(s)
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "") // кирилл үсгийг ч хадгална
     .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 
 // Public list. Admin token байвал бүх төлөв (draft/hidden) ч ирнэ.
 export const listNews = asyncHandler(async (req, res) => {
