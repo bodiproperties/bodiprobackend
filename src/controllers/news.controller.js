@@ -97,7 +97,7 @@ export const createNews = asyncHandler(async (req, res) => {
       titleMn?.trim() || "",
       descEn,
       descMn,
-      youtubeUrl || null,
+      youtubeUrl || "",
       finalStatus,
       pubAt,
     ],
