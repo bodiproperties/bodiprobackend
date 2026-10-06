@@ -27,7 +27,7 @@ export const listNews = asyncHandler(async (req, res) => {
   const where = `WHERE ${conditions.join(" AND ")}`;
   const { rows } = await query(
     `SELECT * FROM news ${where}
-     ORDER BY COALESCE(published_at, created_at) DESC, created_at DESC`
+     ORDER BY COALESCE(published_at, created_at) DESC, created_at DESC`,
   );
   res.json(rows.map((r) => serializeNews(r, lang)));
 });
@@ -41,7 +41,7 @@ export const getNewsBySlug = asyncHandler(async (req, res) => {
     `SELECT * FROM news
      WHERE deleted_at IS NULL AND (slug = $1 OR id::text = $1)
      LIMIT 1`,
-    [key]
+    [key],
   );
   const row = rows[0];
 
@@ -75,7 +75,7 @@ export const createNews = asyncHandler(async (req, res) => {
 
   const finalStatus = normStatus(status);
 
-  // Slug vргэлж давхцахгvй байхын тулд timestamp нэмнэ
+  // Slug үргэлж давхцахгүй байхын тулд timestamp нэмнэ
   const baseSlug = slugify(titleEn || titleMn || "") || "news";
   const finalSlug = `${baseSlug}-${Date.now()}`;
 
@@ -88,8 +88,8 @@ export const createNews = asyncHandler(async (req, res) => {
 
   const { rows } = await query(
     `INSERT INTO news
-       (slug, title_en, title_mn, desc_en, desc_mn, status, published_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7)
+       (slug, title_en, title_mn, desc_en, desc_mn, youtube_url, status, published_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
      RETURNING *`,
     [
       finalSlug,
@@ -97,9 +97,10 @@ export const createNews = asyncHandler(async (req, res) => {
       titleMn?.trim() || "",
       descEn,
       descMn,
+      youtubeUrl || null,
       finalStatus,
       pubAt,
-    ]
+    ],
   );
   res.status(201).json(serializeNews(rows[0]));
 });
@@ -136,7 +137,7 @@ export const updateNews = asyncHandler(async (req, res) => {
       youtubeUrl ?? null,
       nextStatus,
       publishedAt ?? null,
-    ]
+    ],
   );
   if (!rows[0]) return res.status(404).json({ error: "News not found" });
   res.json(serializeNews(rows[0]));
@@ -148,7 +149,7 @@ export const deleteNews = asyncHandler(async (req, res) => {
     `UPDATE news SET deleted_at = now(), updated_at = now()
      WHERE id = $1 AND deleted_at IS NULL
      RETURNING id`,
-    [req.params.id]
+    [req.params.id],
   );
   if (!rows[0]) return res.status(404).json({ error: "News not found" });
   res.json({ ok: true });
@@ -160,7 +161,7 @@ export const restoreNews = asyncHandler(async (req, res) => {
     `UPDATE news SET deleted_at = NULL, updated_at = now()
      WHERE id = $1 AND deleted_at IS NOT NULL
      RETURNING *`,
-    [req.params.id]
+    [req.params.id],
   );
   if (!rows[0]) return res.status(404).json({ error: "News not found" });
   res.json(serializeNews(rows[0]));
