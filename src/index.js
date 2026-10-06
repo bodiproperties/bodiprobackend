@@ -13,19 +13,31 @@ import { notFound, errorHandler } from "./middleware/error.js";
 
 const app = express();
 
-// CORS тохиргоо - Ухаалаг хувилбар
+// CORS тохиргоо
+// Төгсгөлийн "/"-ийг автоматаар хасна — browser Origin header-ийг slash-гүй илгээдэг тул
+// "https://site.vercel.app/" гэж бичсэн ч "https://site.vercel.app"-тай таарна.
+const normalizeOrigin = (s) => s.trim().replace(/\/+$/, "");
+
 const rawOrigins = process.env.CORS_ORIGIN;
 const allowedOrigins = rawOrigins
-  ? rawOrigins.split(",").map((s) => s.trim()).filter(Boolean)
+  ? rawOrigins.split(",").map(normalizeOrigin).filter(Boolean)
   : [];
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      // origin байхгүй: server-to-server (Next.js server fetch, curl, health check)
+      if (
+        !origin ||
+        allowedOrigins.length === 0 ||
+        allowedOrigins.includes(normalizeOrigin(origin))
+      ) {
         return callback(null, true);
       }
-      return callback(new Error(`Origin ${origin} check failed by CORS policy`));
+      // Зөвшөөрөгдөөгүй origin — 500 алдаа биш, зүгээр CORS header-гүй хариу өгнө.
+      // Browser хүсэлтийг өөрөө хаана; log дээр аль origin блоклогдсоныг харна.
+      console.warn(`[CORS] Blocked origin: ${origin}`);
+      return callback(null, false);
     },
     credentials: true,
   })
@@ -60,5 +72,11 @@ app.listen(port, "0.0.0.0", () => {
   console.log(`🚀 bodi-properties API server is running on:`);
   console.log(`   - Local:            http://localhost:${port}`);
   console.log(`   - Environment:      ${process.env.NODE_ENV || "development"}`);
-  console.log(`   - Allowed Origins:  ${allowedOrigins.length > 0 ? allowedOrigins.join(", ") : "All (Development Mode)"}`);
+  console.log(
+    `   - Allowed Origins:  ${
+      allowedOrigins.length > 0
+        ? allowedOrigins.join(", ")
+        : "All (Development Mode)"
+    }`
+  );
 });
