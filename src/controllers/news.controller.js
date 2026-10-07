@@ -1,15 +1,17 @@
 import { query } from "../db.js";
 import { serializeNews } from "../utils/serialize.js";
 import { asyncHandler } from "../middleware/error.js";
+import { cleanHtml } from "../utils/sanitize.js";
 
 const STATUSES = ["draft", "published", "hidden"];
 const normStatus = (s) => (STATUSES.includes(s) ? s : "draft");
 
+// Кирилл үсгийг ч хадгална; эхэн/төгсгөлийн зураасыг хасна
 const slugify = (s) =>
   String(s)
     .toLowerCase()
     .trim()
-    .replace(/[^\p{L}\p{N}\s-]/gu, "") // кирилл үсгийг ч хадгална
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
@@ -96,8 +98,8 @@ export const createNews = asyncHandler(async (req, res) => {
       finalSlug,
       titleEn?.trim() || "",
       titleMn?.trim() || "",
-      descEn,
-      descMn,
+      cleanHtml(descEn),
+      cleanHtml(descMn),
       youtubeUrl || "",
       finalStatus,
       pubAt,
@@ -133,8 +135,8 @@ export const updateNews = asyncHandler(async (req, res) => {
       req.params.id,
       titleEn ?? null,
       titleMn ?? null,
-      descEn ?? null,
-      descMn ?? null,
+      cleanHtml(descEn) ?? null,
+      cleanHtml(descMn) ?? null,
       youtubeUrl ?? null,
       nextStatus,
       publishedAt ?? null,

@@ -1,6 +1,7 @@
 import { query } from "../db.js";
 import { serializeProject } from "../utils/serialize.js";
 import { asyncHandler } from "../middleware/error.js";
+import { cleanHtml } from "../utils/sanitize.js";
 
 const STATUSES = ["draft", "published", "hidden"];
 const normStatus = (s) => (STATUSES.includes(s) ? s : "draft");
@@ -16,7 +17,7 @@ export const listProjects = asyncHandler(async (req, res) => {
 
   const where = `WHERE ${conditions.join(" AND ")}`;
   const { rows } = await query(
-    `SELECT * FROM projects ${where} ORDER BY sort_order ASC, id ASC`
+    `SELECT * FROM projects ${where} ORDER BY sort_order ASC, id ASC`,
   );
   res.json(rows.map(serializeProject));
 });
@@ -24,7 +25,7 @@ export const listProjects = asyncHandler(async (req, res) => {
 export const getProject = asyncHandler(async (req, res) => {
   const { rows } = await query(
     "SELECT * FROM projects WHERE id = $1 AND deleted_at IS NULL",
-    [req.params.id]
+    [req.params.id],
   );
   const row = rows[0];
 
@@ -79,13 +80,13 @@ export const createProject = asyncHandler(async (req, res) => {
       location,
       year,
       image,
-      descriptionEn,
-      descriptionMn,
+      cleanHtml(descriptionEn),
+      cleanHtml(descriptionMn),
       JSON.stringify(detail),
       sortOrder,
       finalStatus,
       pubAt,
-    ]
+    ],
   );
   res.status(201).json(serializeProject(rows[0]));
 });
@@ -135,13 +136,13 @@ export const updateProject = asyncHandler(async (req, res) => {
       location ?? null,
       year ?? null,
       image ?? null,
-      descriptionEn ?? null,
-      descriptionMn ?? null,
+      cleanHtml(descriptionEn) ?? null,
+      cleanHtml(descriptionMn) ?? null,
       detail !== undefined ? JSON.stringify(detail) : null,
       sortOrder ?? null,
       nextStatus,
       publishedAt ?? null,
-    ]
+    ],
   );
   if (!rows[0]) return res.status(404).json({ error: "Project not found" });
   res.json(serializeProject(rows[0]));
@@ -153,7 +154,7 @@ export const deleteProject = asyncHandler(async (req, res) => {
     `UPDATE projects SET deleted_at = now(), updated_at = now()
      WHERE id = $1 AND deleted_at IS NULL
      RETURNING id`,
-    [req.params.id]
+    [req.params.id],
   );
   if (!rows[0]) return res.status(404).json({ error: "Project not found" });
   res.json({ ok: true });
@@ -165,7 +166,7 @@ export const restoreProject = asyncHandler(async (req, res) => {
     `UPDATE projects SET deleted_at = NULL, updated_at = now()
      WHERE id = $1 AND deleted_at IS NOT NULL
      RETURNING *`,
-    [req.params.id]
+    [req.params.id],
   );
   if (!rows[0]) return res.status(404).json({ error: "Project not found" });
   res.json(serializeProject(rows[0]));
