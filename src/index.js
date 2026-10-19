@@ -40,7 +40,7 @@ app.use(
       return callback(null, false);
     },
     credentials: true,
-  })
+  }),
 );
 
 // Хүсэлтийн хэмжээг хязгаарлах (Image upload зэрэгт зориулж 10mb болгов)
@@ -71,12 +71,14 @@ const port = process.env.PORT || 4000;
 app.listen(port, "0.0.0.0", () => {
   console.log(`🚀 bodi-properties API server is running on:`);
   console.log(`   - Local:            http://localhost:${port}`);
-  console.log(`   - Environment:      ${process.env.NODE_ENV || "development"}`);
+  console.log(
+    `   - Environment:      ${process.env.NODE_ENV || "development"}`,
+  );
   console.log(
     `   - Allowed Origins:  ${
       allowedOrigins.length > 0
         ? allowedOrigins.join(", ")
         : "All (Development Mode)"
-    }`
+    }`,
   );
 });
